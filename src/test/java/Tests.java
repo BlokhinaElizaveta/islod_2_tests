@@ -1,8 +1,5 @@
 import org.jetbrains.annotations.NotNull;
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
@@ -13,11 +10,10 @@ import static java.lang.Thread.sleep;
 
 public class Tests {
 
-    private static final int sleepTimeout = 5000;
+    private static final int sleepTimeout = 6000;
     private static final String url = "http://els-rc.naumen.ru";
     private static final String login = "otolstykh@naumen.ru";
     private static final String password = "qwer1234";
-    private static final String organizationId = "d34d081dfba44813b7ae2d18e9a73b61";
 
     private WebDriver driver;
 
@@ -34,13 +30,20 @@ public class Tests {
         login();
 
         String href = "/organizations";
-        clickOnLink(href);
+        clickOnTagWithLink(href);
 
-        href = "/organization/" + organizationId;
-        clickOnLink(href);
+        String organizationName = "Байкальский институт управления";
+        writeToInput("title", organizationName);
+        driver.findElement(By.id("title")).sendKeys(Keys.ENTER);
+        sleep(sleepTimeout);
 
-        href += "/addRequest";
-        clickOnLink(href);
+        WebElement organization = driver.findElement(By.xpath(String.format("//a[contains(text(),'%s')]", organizationName)));
+        href = organization.getAttribute("href").split("/", 4)[3];
+        organization.click();
+        sleep(sleepTimeout);
+
+        href ="/" + href + "/addRequest";
+        clickOnTagWithLink(href);
 
         driver.findElement(By.xpath("//span[@data-dropdown=\"dropdown\"]")).click();
         driver.findElement(By.xpath("//a[@data-id=\"bef70ad3504d46999db9ea296dc3b258\"]")).click();
@@ -65,7 +68,7 @@ public class Tests {
 
         String href = "/admin/systemactions";
         scrollToLink(href);
-        clickOnLink(href);
+        clickOnTagWithLink(href);
 
         writeToInput("nominative", "озеро");
         driver.findElement(By.className("get-declensions")).click();
@@ -90,7 +93,7 @@ public class Tests {
         driver.findElement(By.id(id)).sendKeys(content);
     }
 
-    private void clickOnLink(String href) throws InterruptedException {
+    private void clickOnTagWithLink(String href) throws InterruptedException {
         driver.findElement(By.xpath(String.format("//a[@href=\"%s\"]", href))).click();
         sleep(sleepTimeout);
     }
